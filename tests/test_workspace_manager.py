@@ -5,7 +5,7 @@ import tempfile
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
-from md_editor.workspace_manager import (
+from harlowe.workspace_manager import (
     EphemeralWorkspace,
     WorkspaceManager,
     FileChange,

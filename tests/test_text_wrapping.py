@@ -5,7 +5,7 @@ import tempfile
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from md_editor.markdown_viewer import MarkdownViewer
+from harlowe.markdown_viewer import MarkdownViewer
 
 
 def test_text_wrapping_basic():

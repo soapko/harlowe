@@ -4,9 +4,9 @@ import pytest
 import pytest_asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
-from md_editor.undo_manager import UndoManager
-from md_editor.git_manager import GitManager, GitOperationResult
-from md_editor.models import CommentThread, ThreadStatus, MessageRole
+from harlowe.undo_manager import UndoManager
+from harlowe.git_manager import GitManager, GitOperationResult
+from harlowe.models import CommentThread, ThreadStatus, MessageRole
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def mock_git_manager():
 @pytest.fixture
 def mock_thread_manager():
     """Create a mock ClaudeThreadManager."""
-    from md_editor.models import Message
+    from harlowe.models import Message
 
     manager = Mock()
     manager.threads = []
@@ -34,7 +34,7 @@ def mock_thread_manager():
 
     # Add post_status method that actually appends messages
     def post_status(thread, message):
-        from md_editor.models import Message
+        from harlowe.models import Message
         status_msg = Message.system_message(message)
         thread.messages.append(status_msg)
 
@@ -260,7 +260,7 @@ class TestConflictDetection:
 
     def test_find_conflicts_with_later_commits(self, undo_manager, mock_git_manager):
         """Test finding threads that conflict with an undo."""
-        from md_editor.git_manager import CommitInfo
+        from harlowe.git_manager import CommitInfo
 
         # Create threads
         thread1 = CommentThread(

@@ -2,7 +2,7 @@
 
 import pytest
 import asyncio
-from md_editor.claude_executor import ClaudeExecutor, EditStatus, EditRequest
+from harlowe.claude_executor import ClaudeExecutor, EditStatus, EditRequest
 
 
 def test_add_edit_request():

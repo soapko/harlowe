@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock
-from md_editor.merge_coordinator import (
+from harlowe.merge_coordinator import (
     MergeCoordinator,
     LineRange,
     PendingMerge,
@@ -13,9 +13,9 @@ from md_editor.merge_coordinator import (
     MergeStatus,
     ConflictSeverity
 )
-from md_editor.workspace_manager import WorkspaceChanges, FileChange
-from md_editor.git_manager import GitManager
-from md_editor.models import CommentThread
+from harlowe.workspace_manager import WorkspaceChanges, FileChange
+from harlowe.git_manager import GitManager
+from harlowe.models import CommentThread
 
 
 @pytest.fixture

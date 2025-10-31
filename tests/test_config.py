@@ -3,7 +3,7 @@
 import json
 import pytest
 from pathlib import Path
-from md_editor.config import Config
+from harlowe.config import Config
 
 
 def test_config_default():

@@ -5,7 +5,7 @@ import tempfile
 import shutil
 from pathlib import Path
 from datetime import datetime
-from md_editor.git_manager import GitManager, CommitInfo, GitOperationResult
+from harlowe.git_manager import GitManager, CommitInfo, GitOperationResult
 
 
 @pytest.fixture

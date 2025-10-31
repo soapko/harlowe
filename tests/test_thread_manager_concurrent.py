@@ -6,8 +6,8 @@ import asyncio
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, AsyncMock, patch
-from md_editor.thread_manager_concurrent import ClaudeThreadManager
-from md_editor.models import CommentThread, ThreadStatus, MessageRole
+from harlowe.thread_manager_concurrent import ClaudeThreadManager
+from harlowe.models import CommentThread, ThreadStatus, MessageRole
 
 
 @pytest.fixture

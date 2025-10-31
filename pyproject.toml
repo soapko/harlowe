@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-harlowe = "md_editor.main:main"
+harlowe = "harlowe.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -2,7 +2,7 @@
 
 import pytest
 from datetime import datetime
-from md_editor.models import Message, MessageRole, CommentThread, ThreadStatus
+from harlowe.models import Message, MessageRole, CommentThread, ThreadStatus
 
 
 class TestMessageSystemStatus:
@@ -138,7 +138,7 @@ class TestThreadManagerPostStatus:
 
     def test_post_status_creates_system_message(self):
         """Test that post_status creates a proper system message."""
-        from md_editor.thread_manager_concurrent import ClaudeThreadManager
+        from harlowe.thread_manager_concurrent import ClaudeThreadManager
 
         manager = ClaudeThreadManager(
             claude_command="claude",
@@ -161,7 +161,7 @@ class TestThreadManagerPostStatus:
 
     def test_post_status_triggers_callback(self):
         """Test that post_status triggers UI update callback."""
-        from md_editor.thread_manager_concurrent import ClaudeThreadManager
+        from harlowe.thread_manager_concurrent import ClaudeThreadManager
 
         callback_called = []
 
@@ -186,7 +186,7 @@ class TestThreadManagerPostStatus:
 
     def test_post_status_updates_timestamp(self):
         """Test that post_status updates thread timestamp."""
-        from md_editor.thread_manager_concurrent import ClaudeThreadManager
+        from harlowe.thread_manager_concurrent import ClaudeThreadManager
         import time
 
         manager = ClaudeThreadManager(
@@ -212,7 +212,7 @@ class TestMergeCoordinatorStatusMessages:
 
     def test_post_status_uses_system_message(self):
         """Test that merge coordinator uses system messages."""
-        from md_editor.models import Message, MessageRole
+        from harlowe.models import Message, MessageRole
 
         # This is tested implicitly through the Message.system_message() tests
         msg = Message.system_message("Changes merged successfully")
@@ -226,9 +226,9 @@ class TestUndoManagerStatusMessages:
 
     def test_post_status_delegates_to_thread_manager(self):
         """Test that undo manager delegates to thread manager."""
-        from md_editor.undo_manager import UndoManager
-        from md_editor.git_manager import GitManager
-        from md_editor.thread_manager_concurrent import ClaudeThreadManager
+        from harlowe.undo_manager import UndoManager
+        from harlowe.git_manager import GitManager
+        from harlowe.thread_manager_concurrent import ClaudeThreadManager
         from pathlib import Path
         import tempfile
 
@@ -263,9 +263,9 @@ class TestUndoManagerStatusMessages:
 
     def test_post_error_includes_warning(self):
         """Test that error messages include warning emoji."""
-        from md_editor.undo_manager import UndoManager
-        from md_editor.git_manager import GitManager
-        from md_editor.thread_manager_concurrent import ClaudeThreadManager
+        from harlowe.undo_manager import UndoManager
+        from harlowe.git_manager import GitManager
+        from harlowe.thread_manager_concurrent import ClaudeThreadManager
         from pathlib import Path
         import tempfile
 
