@@ -25,14 +25,9 @@ md-editor path/to/your/file.md
 
 ## Configuration
 
-Config file at `~/.config/md-editor/config.json`:
+Reference files can be set up using `Ctrl-r` within the editor.
 
-```json
-{
-  "resource_files": ["path/to/context.md", "path/to/style-guide.md"],
-  "claude_command": "claude"
-}
-```
+**Note:** Editing `~/.config/md-editor/config.json` directly has been deprecated in favor of the `Ctrl-r` keyboard shortcut.
 
 ## Keyboard Shortcuts
 
