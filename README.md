@@ -32,10 +32,11 @@ Reference files can be set up using `Ctrl-r` within the editor.
 ## Keyboard Shortcuts
 
 ### Navigation
-- `j/k` - Move down/up
+- `j/k` or `↑/↓` - Move down/up
 - `gg` - Go to top
 - `G` - Go to bottom
 - `Ctrl+d/u` - Page down/up
+- Mouse scroll wheel - Scroll up/down
 
 ### Selection
 - `v` - Enter visual mode
