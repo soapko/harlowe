@@ -12,7 +12,7 @@ from textual.screen import Screen
 from .markdown_viewer import MarkdownViewer
 from .comment_input import CommentInput
 from .edit_panel import EditPanel
-from .thread_manager import ClaudeThreadManager
+from .thread_manager_concurrent import ClaudeThreadManager
 from .config import Config
 from .thread_chat_panel import ThreadChatPanel
 from .thread_persistence import ThreadPersistence
@@ -21,6 +21,9 @@ from .models import CommentThread, ThreadStatus, ThreadViewMode
 from .resource_file_selector import ResourceFileSelector
 from .resource_file_manager import ResourceFileManager
 from .file_picker import FileBrowser
+from .undo_manager import UndoManager
+from .git_manager import GitManager
+from .merge_coordinator import MergeCoordinator
 
 
 class ResourceFileScreen(Screen):
@@ -297,6 +300,8 @@ class MarkdownEditorApp(App):
         Binding("r", "reload_file", "Reload File"),
         Binding("ctrl+o", "open_file_picker", "Open File"),
         Binding("ctrl+r", "select_resources", "Select Resources"),
+        Binding("ctrl+z", "undo_thread", "Undo"),
+        Binding("ctrl+shift+z", "redo_thread", "Redo"),
         Binding("?", "show_help", "Help"),
     ]
 
@@ -324,7 +329,10 @@ class MarkdownEditorApp(App):
 
         # File-dependent components (initialized only when file is loaded)
         self.resource_manager: ResourceFileManager | None = None
+        self.git_manager: GitManager | None = None
+        self.merge_coordinator: MergeCoordinator | None = None
         self.thread_manager: ClaudeThreadManager | None = None
+        self.undo_manager: UndoManager | None = None
         self.persistence: ThreadPersistence | None = None
 
         # Initialize file-dependent components if file path provided
@@ -344,13 +352,34 @@ class MarkdownEditorApp(App):
         # Fall back to global config resources if no per-file resources
         resource_files = saved_resources if saved_resources else self.config.validate_resource_files()
 
-        # Initialize thread manager
+        # Initialize git manager for version control
+        self.git_manager = GitManager(self.file_path)
+        self.git_manager.ensure_repo()  # Create .harlowe/.git if needed
+
+        # Initialize merge coordinator for conflict resolution
+        self.merge_coordinator = MergeCoordinator(
+            git_manager=self.git_manager,
+            document_path=Path(self.file_path),
+            thread_manager=None  # Will be set after thread_manager is created
+        )
+
+        # Initialize thread manager with concurrent execution support
         self.thread_manager = ClaudeThreadManager(
             claude_command=self.config.claude_command,
             file_path=self.file_path,
-            resource_files=resource_files
+            resource_files=resource_files,
+            merge_coordinator=self.merge_coordinator
         )
         self.thread_manager.set_on_update_callback(self._on_thread_update)
+
+        # Link merge coordinator back to thread manager
+        self.merge_coordinator.thread_manager = self.thread_manager
+
+        # Initialize undo manager for git-based undo/redo
+        self.undo_manager = UndoManager(
+            git_manager=self.git_manager,
+            thread_manager=self.thread_manager
+        )
 
         # Initialize thread persistence
         self.persistence = ThreadPersistence(
@@ -891,6 +920,87 @@ class MarkdownEditorApp(App):
 
             if self.status_bar:
                 self.status_bar.notification = f"File reloaded (cursor at line {new_cursor + 1})"
+
+    def action_undo_thread(self) -> None:
+        """Undo the current/most recent thread's changes."""
+        if not self.undo_manager:
+            return
+
+        async def perform_undo():
+            # Determine which thread to undo
+            thread_to_undo = None
+
+            # Priority 1: If thread selector is visible and has a selection, use that thread
+            # (undo_manager will validate if it can be undone)
+            if self.thread_mode and self.thread_selector:
+                selected_thread = self.thread_selector.get_selected_thread()
+                if selected_thread:
+                    thread_to_undo = selected_thread
+
+            # Priority 2: Find most recently merged thread
+            if not thread_to_undo:
+                completed_threads = [t for t in self.thread_manager.threads
+                                   if t.status == ThreadStatus.COMPLETED
+                                   and not t.metadata.get('reverted', False)]
+                if completed_threads:
+                    # Sort by updated_at to get most recent
+                    thread_to_undo = max(completed_threads, key=lambda t: t.updated_at)
+
+            if thread_to_undo:
+                await self.undo_manager.undo_thread(thread_to_undo)
+
+                # Reload file to show reverted changes
+                if self.viewer:
+                    self.viewer.reload_file()
+
+                if self.status_bar:
+                    # Use initial_comment as the thread identifier
+                    comment_preview = thread_to_undo.initial_comment[:30]
+                    if len(thread_to_undo.initial_comment) > 30:
+                        comment_preview += "..."
+                    self.status_bar.notification = f"Undoing thread: {comment_preview}"
+            else:
+                if self.status_bar:
+                    self.status_bar.notification = "No thread to undo"
+
+        self.run_worker(perform_undo())
+
+    def action_redo_thread(self) -> None:
+        """Redo an undone thread."""
+        if not self.undo_manager:
+            return
+
+        async def perform_redo():
+            # Determine which thread to redo
+            thread_to_redo = None
+
+            # Priority 1: If thread selector is visible and has a selection, use that thread
+            # (undo_manager will validate if it can be redone)
+            if self.thread_mode and self.thread_selector:
+                selected_thread = self.thread_selector.get_selected_thread()
+                if selected_thread:
+                    thread_to_redo = selected_thread
+
+            # Priority 2: Find most recently undone thread
+            # (redo_thread will handle this if thread_to_redo is None)
+
+            # Pass the selected thread (or None for auto-select)
+            await self.undo_manager.redo_thread(thread_to_redo)
+
+            # Reload file to show re-applied changes
+            if self.viewer:
+                self.viewer.reload_file()
+
+            if self.status_bar:
+                if thread_to_redo:
+                    comment_preview = thread_to_redo.initial_comment[:30]
+                    if len(thread_to_redo.initial_comment) > 30:
+                        comment_preview += "..."
+                    self.status_bar.notification = f"Redoing thread: {comment_preview}"
+                else:
+                    self.status_bar.notification = "Redoing thread"
+
+        self.run_worker(perform_redo())
 
     def action_open_file_picker(self) -> None:
         """Show file picker to open a different file."""
