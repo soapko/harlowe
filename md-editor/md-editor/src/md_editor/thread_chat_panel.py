@@ -94,6 +94,13 @@ class ThreadChatPanel(Container):
 
     def _write_message(self, log: RichLog, message: Message) -> None:
         """Write a message to the log in CLI format."""
+        # Check if this is a system message
+        if message.is_system or message.role == MessageRole.SYSTEM:
+            # System messages: lighter styling, no timestamp
+            log.write(f"[dim italic]{message.content}[/]")
+            log.write("")  # Blank separator
+            return
+
         # Role emoji and name
         if message.role == MessageRole.USER:
             role = "👤 YOU"

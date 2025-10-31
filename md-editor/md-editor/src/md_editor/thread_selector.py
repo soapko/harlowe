@@ -137,9 +137,12 @@ class ThreadSelector(ScrollView):
         # Check if thread has unread updates or is awaiting response
         is_unread = thread.has_unread_updates
         is_awaiting = thread.awaiting_response
+        is_system = thread.is_system_thread
 
-        # Add status indicator: awaiting takes priority over unread
-        if is_awaiting:
+        # Add status indicator: system thread takes priority, then awaiting, then unread
+        if is_system:
+            status_prefix = "⚙️ "
+        elif is_awaiting:
             status_prefix = "⏳ "
         elif is_unread:
             status_prefix = "* "
@@ -162,6 +165,9 @@ class ThreadSelector(ScrollView):
         # Highlight selected
         if line_index == self.selected_index:
             text = Text(f"{full_prefix}{line_text}", style=Style(bgcolor="blue", color="white", bold=True))
+        elif is_system:
+            # System threads: dimmed to indicate they're auto-generated
+            text = Text(f"{full_prefix}{line_text}", style=Style(dim=True, italic=True))
         elif is_awaiting:
             # Awaiting response: cyan color to indicate activity
             text = Text(f"{full_prefix}{line_text}", style=Style(color="cyan", bold=True))

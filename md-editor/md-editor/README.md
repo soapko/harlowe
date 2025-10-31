@@ -1,0 +1,69 @@
+# Markdown Editor with Claude Integration
+
+A CLI TUI app for commenting on markdown files and sending those comments to Claude CLI for editing.
+
+## Features
+
+- Split-pane interface: markdown viewer + comment input
+- Vim-style visual selection for text passages
+- Asynchronous Claude CLI integration (non-blocking)
+- Manual review and approval of edits
+- Smart refresh that preserves your position
+- Serial edit queue to avoid conflicts
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+```bash
+md-editor path/to/your/file.md
+```
+
+## Configuration
+
+Config file at `~/.config/md-editor/config.json`:
+
+```json
+{
+  "resource_files": ["path/to/context.md", "path/to/style-guide.md"],
+  "claude_command": "claude"
+}
+```
+
+## Keyboard Shortcuts
+
+### Navigation
+- `j/k` - Move down/up
+- `gg` - Go to top
+- `G` - Go to bottom
+- `Ctrl+d/u` - Page down/up
+
+### Selection
+- `v` - Enter visual mode
+- `j/k` - Expand selection
+- `Enter` - Capture selection and focus comment box
+- `Esc` - Exit visual mode
+
+### Commenting
+- `Enter` (in comment box) - Submit comment to Claude
+- `Esc` - Return to viewer
+
+### Review
+- `r` - Review pending edits
+- `a` - Accept edit
+- `d` - Reject edit
+- `R` - Reload file with accepted edits
+
+## How It Works
+
+1. Navigate the markdown file in the top pane
+2. Press `v` to enter visual mode and select text
+3. Type your editing instruction in the bottom pane
+4. Press Enter to send to Claude (runs in background)
+5. Continue working - you'll see pending edit count
+6. When edits arrive, press `r` to review
+7. Accept/reject edits, then `R` to reload

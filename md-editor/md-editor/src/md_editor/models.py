@@ -34,13 +34,15 @@ class Message:
     role: MessageRole
     content: str
     timestamp: datetime = field(default_factory=datetime.now)
+    is_system: bool = False
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "role": self.role.value,
             "content": self.content,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
+            "is_system": self.is_system
         }
 
     @classmethod
@@ -49,7 +51,17 @@ class Message:
         return cls(
             role=MessageRole(data["role"]),
             content=data["content"],
-            timestamp=datetime.fromisoformat(data["timestamp"])
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            is_system=data.get("is_system", False)
+        )
+
+    @classmethod
+    def system_message(cls, content: str) -> "Message":
+        """Create a system status message."""
+        return cls(
+            role=MessageRole.SYSTEM,
+            content=f"[Harlowe]: {content} 🤖",
+            is_system=True
         )
 
 
@@ -74,6 +86,8 @@ class CommentThread:
     updated_at: datetime = field(default_factory=datetime.now)
     last_viewed_at: Optional[datetime] = None  # When user last viewed this thread
     awaiting_response: bool = False  # True when waiting for Claude to respond
+    metadata: dict = field(default_factory=dict)  # For git commits, undo/redo tracking, etc.
+    is_system_thread: bool = False  # Mark system-generated threads (merge resolution, etc.)
 
     def add_message(self, role: MessageRole, content: str) -> None:
         """Add a message to the conversation history."""
@@ -108,7 +122,9 @@ class CommentThread:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "last_viewed_at": self.last_viewed_at.isoformat() if self.last_viewed_at else None,
-            "awaiting_response": self.awaiting_response
+            "awaiting_response": self.awaiting_response,
+            "metadata": self.metadata,
+            "is_system_thread": self.is_system_thread
         }
 
     @classmethod
@@ -128,5 +144,7 @@ class CommentThread:
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data["updated_at"]),
             last_viewed_at=datetime.fromisoformat(last_viewed) if last_viewed else None,
-            awaiting_response=data.get("awaiting_response", False)
+            awaiting_response=data.get("awaiting_response", False),
+            metadata=data.get("metadata", {}),
+            is_system_thread=data.get("is_system_thread", False)
         )
