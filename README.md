@@ -7,7 +7,7 @@ A CLI TUI app for commenting on markdown files and sending those comments to Cla
 - Split-pane interface: markdown viewer + comment input
 - Vim-style visual selection for text passages
 - Asynchronous Claude CLI integration (non-blocking)
-- Automatic edits with undo/redo support
+- Manual review and approval of edits
 - Smart refresh that preserves your position
 - Serial edit queue to avoid conflicts
 
@@ -49,17 +49,21 @@ Reference files can be set up using `Ctrl-r` within the editor.
 - `Enter` - New line in comment box
 - `Esc` - Return to viewer
 
-### Edit Management
-- `Ctrl-z` - Undo edit in selected thread
-- `Shift-Ctrl-z` - Redo edit in selected thread
-- `R` - Reload page to see applied edits
+### Review
+- `r` - Review pending edits
+- `a` - Accept edit
+- `d` - Reject edit
+- `R` - Reload file with accepted edits
 
 ## How It Works
 
 1. Navigate the markdown file in the top pane
-2. Press `v` to enter visual mode and select text
+2. Press `Enter` to enter selection mode and select text to comment on desired changes
 3. Type your editing instruction in the bottom pane
-4. Press Enter to send to Claude (runs in background)
-5. Continue working - edits are applied automatically
-6. Press `R` to reload and see the applied edits
-7. Use `Ctrl-z` / `Shift-Ctrl-z` to undo/redo edits in the selected thread
+4. Type `Ctrl-j` to send to Claude (runs in background)
+5. Continue working - you'll see pending edit count
+6. When Claude responds, you'll get a toast
+7. Type `t` to see the list of all comment threads you have, active, recent, or closed
+8. Select the recent thread response from Claude if you wish to chat about the edits.
+9. Press `r` to reload the page with the edits
+10. Press `ctrl-z` to undo edits from that thread alone
