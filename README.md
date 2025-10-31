@@ -39,13 +39,14 @@ Reference files can be set up using `Ctrl-r` within the editor.
 - Mouse scroll wheel - Scroll up/down
 
 ### Selection
-- `v` - Enter visual mode
-- `j/k` - Expand selection
+- `Enter` - Enter selection mode
+- `j/k` or `↑/↓` - Expand selection
 - `Enter` - Capture selection and focus comment box
 - `Esc` - Exit visual mode
 
 ### Commenting
-- `Enter` (in comment box) - Submit comment to Claude
+- `Ctrl-j` - Submit comment to Claude
+- `Enter` - New line in comment box
 - `Esc` - Return to viewer
 
 ### Review
